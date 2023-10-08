@@ -3,26 +3,22 @@ st.set_page_config(layout="wide")
 from mongo import arxiv_db
 
 def getDates():
-	user = st.text_input("用户名称")
-	if user=="zlnn":
-		unreadOnly = st.selectbox(
-			"未读/已读/Star/所有",
-			options=[
-				dict(value={"$exists":False},label="未读"), # UnRead Only
-				dict(value={"$exists":True},label="已读"), # Already Read
-				dict(value="Star",label="标星⭐️"), # Starred
-				dict(value=False,label="All") # All
-				],
-			format_func=lambda x:x["label"],
-			index=0)["value"]
-	else:
-		unreadOnly = False
+	unreadOnly = st.selectbox(
+		"未读/已读/Star/所有",
+		options=[
+			dict(value={"$exists":False},label="未读"), # UnRead Only
+			dict(value={"$exists":True},label="已读"), # Already Read
+			dict(value="Star",label="标星⭐️"), # Starred
+			dict(value=False,label="All") # All
+			],
+		format_func=lambda x:x["label"],
+		index=0)["value"]
 	if unreadOnly:
 		dates = sorted(arxiv_db.find({"Read":unreadOnly}).distinct("email_date"),reverse=False)
 	else:
 		dates = sorted(arxiv_db.find({}).distinct("email_date"),reverse=False)
 	k = st.select_slider("选择日期",dates,value=dates[-1])
-	return k,unreadOnly,user
+	return k,unreadOnly
 
 def MarkRead(paper_id):
 	arxiv_db.update_one(dict(_id=paper_id),{"$set":{"Read":"Read"}})
@@ -30,7 +26,7 @@ def MarkRead(paper_id):
 def MarkStar(paper_id):
 	arxiv_db.update_one(dict(_id=paper_id),{"$set":{"Read":"Star"}})
 
-def getPapers(date,unreadOnly,user):
+def getPapers(date,unreadOnly):
 	query = dict(email_date=date)
 	is_first = True
 	papers = list(arxiv_db.find(query))
@@ -55,24 +51,23 @@ def getPapers(date,unreadOnly,user):
 		with st.expander(paper["title"],is_first):
 			is_first = False
 			paper_id = paper["_id"]
-			if user=="zlnn17":
-				l,r=st.columns(2)
-				l.button(
-					"Mark → 已读",
-					on_click=MarkRead,
-					key=paper["link"]+"read",
-					use_container_width=True,
-					kwargs=dict(paper_id=paper_id),
-					disabled=("Read" in paper)
-					)
-				r.button(
-					"Mark → 标星⭐️",
-					on_click=MarkStar,
-					key=paper["link"]+"star",
-					use_container_width=True,
-					kwargs=dict(paper_id=paper_id),
-					disabled=("Read" in paper and paper["Read"]=="Good")
-					)
+			l,r=st.columns(2)
+			l.button(
+				"Mark → 已读",
+				on_click=MarkRead,
+				key=paper["link"]+"read",
+				use_container_width=True,
+				kwargs=dict(paper_id=paper_id),
+				disabled=("Read" in paper)
+				)
+			r.button(
+				"Mark → 标星⭐️",
+				on_click=MarkStar,
+				key=paper["link"]+"star",
+				use_container_width=True,
+				kwargs=dict(paper_id=paper_id),
+				disabled=("Read" in paper and paper["Read"]=="Good")
+				)
 			st.markdown(f"### {raw_title}")
 			st.markdown("###### [View in arXiv]({})".format(paper["link"].replace("abs","pdf")+".pdf"))
 			for key,value in sorted(list(paper.items()),key=lambda x:x[0]):
@@ -87,5 +82,5 @@ def getPapers(date,unreadOnly,user):
 			if "cs" in paper:
 				st.markdown(f"###### tags(under cs)")
 				st.markdown(', '.join(list(paper["cs"].keys())))
-date,unreadOnly,user = getDates()
-getPapers(date,unreadOnly,user)
+date,unreadOnly = getDates()
+getPapers(date,unreadOnly)
