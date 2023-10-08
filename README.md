@@ -1,6 +1,7 @@
 # ArXivFeedReader
 New Arxiv Reader base on Feed
 
+[toc]
 ### Install
 ```bash
 pip3 install pymongo feedparser
