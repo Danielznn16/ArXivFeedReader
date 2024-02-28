@@ -82,5 +82,8 @@ def parse():
 parse()
 
 while True:
-    parse()
-    time.sleep(4 * 60 * 60)  # Sleeps for 4 hours
+	try:
+		parse()
+	except:
+		pass
+	time.sleep(4 * 60 * 60)  # Sleeps for 4 hours

@@ -1,5 +1,6 @@
 import streamlit as st
-st.set_page_config(layout="wide")
+#st.set_page_config(layout="wide")
+from utils import *
 from mongo import arxiv_db
 
 def getDates():
@@ -14,9 +15,12 @@ def getDates():
 		format_func=lambda x:x["label"],
 		index=0)["value"]
 	if unreadOnly:
+		num = arxiv_db.count_documents({"Read":unreadOnly})
 		dates = sorted(arxiv_db.find({"Read":unreadOnly}).distinct("email_date"),reverse=False)
 	else:
+		num = arxiv_db.count_documents({})
 		dates = sorted(arxiv_db.find({}).distinct("email_date"),reverse=False)
+	st.markdown(f"**{num}** Papers in List")
 	k = st.select_slider("选择日期",dates,value=dates[-1])
 	return k,unreadOnly
 
@@ -77,7 +81,7 @@ def getPapers(date,unreadOnly):
 				if key=="abstract":
 					value = value.replace(". ",".\n\n")
 				st.markdown(
-					value,
+					value if value is not str else bionic_reading(value),
 					unsafe_allow_html=True)
 			if "cs" in paper:
 				st.markdown(f"###### tags(under cs)")
