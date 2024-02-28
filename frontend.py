@@ -3,6 +3,8 @@ import streamlit as st
 from utils import *
 from mongo import arxiv_db
 
+st.set_page_config(page_title="Arxiv")
+
 def getDates():
 	unreadOnly = st.selectbox(
 		"未读/已读/Star/所有",
