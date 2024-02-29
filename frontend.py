@@ -3,7 +3,7 @@ import streamlit as st
 from utils import *
 from mongo import arxiv_db
 
-st.set_page_config(page_title="Arxiv")
+st.set_page_config(page_title="Arxiv", page_icon="./icon.jpg")
 
 def getDates():
 	unreadOnly = st.selectbox(
