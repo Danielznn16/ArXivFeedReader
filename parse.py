@@ -64,7 +64,8 @@ def parse():
 		feed = feedparser.parse(rss_feed_url)
 		time = feed.feed.updated_parsed
 		for entry in feed.entries:
-			if True:
+			try:
+			# if True:
 				entry = clean_entry(entry)
 				entry["date"] = time
 				entry["email_date"] = time
@@ -74,9 +75,9 @@ def parse():
 				if status!="new":
 					del entry["email_date"], entry["date"]
 				pprint(entry)
-				# collection.update_one(dict(id=entry["id"]),{"$set":entry},upsert=True)
-			# except:
-			# 	pass
+				collection.update_one(dict(id=entry["id"]),{"$set":entry},upsert=True)
+			except Exception as e:
+				print(e)
 
 parse()
 
